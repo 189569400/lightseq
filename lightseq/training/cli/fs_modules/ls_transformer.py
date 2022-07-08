@@ -20,6 +20,8 @@ from lightseq.training.ops.pytorch.quantization import (
     ptq_mode,
 )
 
+from lightseq.training.pytorch_quantization.nn.modules.tensor_quantizer import (
+    TensorQuantizer)
 
 DEFAULT_MIN_PARAMS_TO_WRAP = int(1e8)
 MAX_SEQ_LENGTH = 300
@@ -113,6 +115,8 @@ class LSTransformerModel(FairseqEncoderDecoderModel):
         # args for Training with Quantization Noise for Extreme Model Compression ({Fan*, Stock*} et al., 2020)
         parser.add_argument('--quant-noise-pq', type=float, metavar='D', default=0,
                             help='iterative PQ quantization noise at training time')
+        parser.add_argument('--grad-factor', type=float, metavar='D', default=0,
+                            help='iterative PQ quantization noise at training time')
         parser.add_argument('--quant-noise-pq-block-size', type=int, metavar='D', default=8,
                             help='block size of quantization noise at training time')
         parser.add_argument('--quant-noise-scalar', type=float, metavar='D', default=0,
@@ -169,11 +173,17 @@ class LSTransformerModel(FairseqEncoderDecoderModel):
         encoder = cls.build_encoder(args, src_dict, encoder_embed_tokens)
         decoder = cls.build_decoder(args, tgt_dict, decoder_embed_tokens)
 
+        def change_factor(m):
+            if isinstance(m, TensorQuantizer):
+                m.factor = args.grad_factor
+
         if args.enable_quant:
             if args.use_torch_layer:
                 if args.quant_mode == "qat":
                     encoder.apply(qat_mode)
                     decoder.apply(qat_mode)
+                    encoder.apply(change_factor)
+                    decoder.apply(change_factor)
                 elif args.quant_mode == "ptq":
                     encoder.apply(ptq_mode)
                     decoder.apply(ptq_mode)

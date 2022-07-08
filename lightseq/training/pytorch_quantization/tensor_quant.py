@@ -331,15 +331,24 @@ class FakeTensorQuantFunction(Function):
     """
 
     @staticmethod
-    def forward(ctx, inputs, amax, num_bits=8, unsigned=False, narrow_range=True):
+    def forward(ctx, inputs, amax, num_bits=8, unsigned=False, narrow_range=True, factor=0.001):
         # ctx.save_for_backward(inputs, amax)
         outputs, scale = _tensor_quant(inputs, amax, num_bits, unsigned, narrow_range)
         if unsigned:
             outputs += (2.0 ** (num_bits - 1)) - 1.0
-        return (outputs * scale).to(inputs.dtype)
+        outputs = (outputs * scale).to(inputs.dtype)
+        ctx.unsigned = unsigned
+        if not ctx.unsigned:
+            ctx.save_for_backward(inputs-outputs)
+            ctx.factor = factor
+        return outputs
 
     @staticmethod
     def backward(ctx, grad_outputs):
+        if not ctx.unsigned:
+            diff = ctx.saved_tensors[0]
+            scale = 1 + ctx.factor * torch.sign(grad_outputs) * diff
+            grad_outputs = grad_outputs * scale
         # inputs, amax = ctx.saved_tensors
         # zero = grad_outputs.new_zeros(1)
         # grad_inputs = torch.where(inputs.abs() <= amax, grad_outputs, zero)

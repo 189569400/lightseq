@@ -81,6 +81,7 @@ class TensorQuantizer(nn.Module):
         if_quant=False,
         if_clip=False,
         if_calib=False,
+        factor=0.001,
     ):
         """Initialize quantizer and set up required variables"""
         super(TensorQuantizer, self).__init__()
@@ -92,7 +93,7 @@ class TensorQuantizer(nn.Module):
         self._learn_amax = quant_desc.learn_amax
         self._unsigned = quant_desc.unsigned
         self._narrow_range = quant_desc.narrow_range
-
+        self.factor = factor
         self._scale = None if not quant_desc.fake_quant else 1.0
         self._disabled = disabled
         self._if_quant = if_quant
@@ -349,7 +350,7 @@ class TensorQuantizer(nn.Module):
         if self._fake_quant:
             if not TensorQuantizer.use_fb_fake_quant:
                 outputs = fake_tensor_quant(
-                    inputs, amax, self._num_bits, self._unsigned, self._narrow_range
+                    inputs, amax, self._num_bits, self._unsigned, self._narrow_range, self.factor
                 )
             else:
                 if inputs.dtype == torch.half or amax.dtype == torch.half:

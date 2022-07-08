@@ -35,13 +35,14 @@ class QuantLinear(Linear):
         else:
             input_quant_config = act_quant_config
 
+        factor = kwargs.get("factor", 0.001)
         self.input_quant = None
         if pre_activation != "encoder_out":
-            self.input_quant = TensorQuantizer(input_quant_config)
+            self.input_quant = TensorQuantizer(input_quant_config, factor=factor)
         self.output_quant = None
         # if pre_activation is None:
-        self.output_quant = TensorQuantizer(out_quant_config)
-        self.weight_quant = TensorQuantizer(weight_quant_config)
+        self.output_quant = TensorQuantizer(out_quant_config, factor=factor)
+        self.weight_quant = TensorQuantizer(weight_quant_config, factor=factor)
 
     def forward(self, input):
         qinput = input
