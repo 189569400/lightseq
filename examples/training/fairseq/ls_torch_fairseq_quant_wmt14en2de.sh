@@ -3,6 +3,8 @@ set -ex
 THIS_DIR=$(dirname $(readlink -f $0))
 cd $THIS_DIR/../../..
 
+pip3 install -e ./
+
 if [ ! -d "/tmp/wmt14_en_de" ]; then
     echo "Downloading dataset"
     wget http://lf3-nlp-opensource.bytetos.com/obj/nlp-opensource/lightseq/wmt_data/databin_wmt14_en_de.tar.gz -P /tmp
