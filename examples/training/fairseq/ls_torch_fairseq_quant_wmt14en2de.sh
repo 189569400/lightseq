@@ -3,16 +3,13 @@ set -ex
 THIS_DIR=$(dirname $(readlink -f $0))
 cd $THIS_DIR/../../..
 
-git submodule update
-pip3 install -e ./
-
 if [ ! -d "/tmp/wmt14_en_de" ]; then
     echo "Downloading dataset"
     wget http://lf3-nlp-opensource.bytetos.com/obj/nlp-opensource/lightseq/wmt_data/databin_wmt14_en_de.tar.gz -P /tmp
     tar -zxvf /tmp/databin_wmt14_en_de.tar.gz -C /tmp && rm /tmp/databin_wmt14_en_de.tar.gz
 fi
 
-lightseq-train /tmp/wmt14_en_de/ \
+CUDA_VISIBLE_DEVICES=1 lightseq-train /tmp/wmt14_en_de/ \
     --task translation \
     --arch ls_transformer --share-decoder-input-output-embed \
     --optimizer ls_adam --adam-betas '(0.9, 0.98)' \
