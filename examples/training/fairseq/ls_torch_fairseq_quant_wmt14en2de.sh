@@ -3,6 +3,7 @@ set -ex
 THIS_DIR=$(dirname $(readlink -f $0))
 cd $THIS_DIR/../../..
 
+git submodule update
 pip3 install -e ./
 
 if [ ! -d "/tmp/wmt14_en_de" ]; then
