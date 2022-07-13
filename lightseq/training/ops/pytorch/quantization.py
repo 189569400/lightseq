@@ -29,6 +29,7 @@ weight_quant_config = QuantDescriptor(
 
 class QuantLinear(Linear):
     def __init__(self, in_features, out_features, pre_activation=None, *args, **kwargs):
+        quant_name = kwargs.pop("quant_name", "")
         super(QuantLinear, self).__init__(in_features, out_features, *args, **kwargs)
         if pre_activation == "relu":
             input_quant_config = relu_quant_config
@@ -38,7 +39,7 @@ class QuantLinear(Linear):
         factor = kwargs.get("factor", 0.001)
         self.input_quant = None
         if pre_activation != "encoder_out":
-            self.input_quant = TensorQuantizer(input_quant_config, factor=factor)
+            self.input_quant = TensorQuantizer(input_quant_config, factor=factor, quant_name=quant_name)
         self.output_quant = None
         # if pre_activation is None:
         self.output_quant = TensorQuantizer(out_quant_config, factor=factor)

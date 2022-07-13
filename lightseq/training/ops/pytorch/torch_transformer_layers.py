@@ -91,7 +91,7 @@ class MultiheadAttention(nn.Module):
             self.qkv_proj = QuantLinear(embed_dim, 3 * embed_dim, bias=bias)
 
             self.attention_quant = (
-                TensorQuantizer(act_quant_config) if self.is_decoder else None
+                TensorQuantizer(act_quant_config, quant_name="be_qkv") if self.is_decoder else None
             )
         elif self.encoder_decoder_attention and self.is_decoder:
             self.k_proj = QuantLinear(
@@ -563,6 +563,7 @@ class TransformerEncoderLayer(TransformerEncoderLayerBase):
             config.intermediate_size,
             self.embed_dim,
             pre_activation=config.activation_fn,
+            quant_name="be_relu",
         )
 
         self.final_layer_norm = LayerNorm(self.embed_dim)
@@ -715,6 +716,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             config.intermediate_size,
             self.embed_dim,
             pre_activation=config.activation_fn,
+            quant_name="be_relu",
         )
 
         self.final_layer_norm = LayerNorm(self.embed_dim)
