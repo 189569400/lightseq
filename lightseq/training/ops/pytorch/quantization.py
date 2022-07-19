@@ -36,7 +36,7 @@ class QuantLinear(Linear):
         else:
             input_quant_config = act_quant_config
 
-        factor = kwargs.get("factor", 0.001)
+        factor = kwargs.get("factor", 0.1)
         self.input_quant = None
         if pre_activation != "encoder_out":
             self.input_quant = TensorQuantizer(input_quant_config, factor=factor, quant_name=quant_name)

@@ -100,7 +100,7 @@ class TensorQuantizer(nn.Module):
         self._if_quant = if_quant
         self._if_clip = False
         self._if_calib = if_calib
-        self._skip_scale_grad = True if quant_name in ("be_qkv","be_relu") else False
+        self._skip_scale_grad = True if quant_name in ("be_relu") else False
 
         if quant_desc.amax is not None:
             self.register_buffer("_amax", torch.tensor(quant_desc.amax))
